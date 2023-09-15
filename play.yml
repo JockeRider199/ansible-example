@@ -1,0 +1,35 @@
+- name: Deploy app
+  hosts: home
+  tasks:
+    - name: Ensure folder exists
+      ansible.builtin.file:
+        path: /home/jocke/app
+        state: "directory"
+
+    - name: Copy required files
+      ansible.builtin.copy:
+        src: docker-compose.yml
+        dest: /home/jocke/app/docker-compose.yml
+
+    - name: Stopping existing stack
+      ansible.builtin.command: 
+        cmd: docker compose down
+      args:
+        chdir: /home/jocke/app
+
+    - name: Pulling containers
+      ansible.builtin.command:
+        cmd: docker compose pull
+      args:
+        chdir: /home/jocke/app
+
+    - name: Start stack
+      ansible.builtin.command: 
+        cmd: docker compose up -d
+      args:
+        chdir: /home/jocke/app
+      register: start_output
+
+    - name: Show results
+      ansible.builtin.debug:
+        var: start_output.stderr_lines
